@@ -175,9 +175,10 @@ function onYouTubeIframeAPIReady() {
 
 // Memuat API YouTube
 var tag = document.createElement('script');
-tag.src = "https://www.youtube.com/iframe_api";
+tag.src = "https://www.youtube.com/iframe_api?key=AIzaSyCTu_aaZCkGrDWrVma2SGRdsVOBQowsia4"; // Tambahkan kunci API Anda di sini
 var firstScriptTag = document.getElementsByTagName('script')[0];
 firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
+
 
 const apiKota = "https://api.myquran.com/v2/sholat/kota/semua";
 const apiJadwal = "https://api.myquran.com/v2/sholat/jadwal/";
@@ -294,9 +295,37 @@ function loadKoreksiWaktu() {
 }
 
 function simpanJadwal() {
+    // Menyimpan data jadwal sholat dan koreksi waktu ke localStorage
+    const citySelect = document.getElementById("city-select");
+    const cityId = citySelect.value;
+    const cityName = citySelect.options[citySelect.selectedIndex].text;
+    
+    // Menyimpan jadwal sholat dan koreksi waktu
+    const koreksiWaktu = loadKoreksiWaktu(); // Mengambil koreksi waktu dari localStorage
+    const jadwalDenganKoreksi = Object.keys(jadwalSholat).reduce((result, waktu) => {
+        const originalTime = jadwalSholat[waktu];
+        const koreksi = koreksiWaktu[waktu] || 0;
+        const updatedTime = adjustTime(originalTime, koreksi);
+        result[waktu] = updatedTime;
+        return result;
+    }, {});
+
+    // Simpan jadwal dan kota yang dipilih
+    const savedData = {
+        cityId: cityId,
+        cityName: cityName,
+        jadwal: jadwalDenganKoreksi,
+        koreksiWaktu: koreksiWaktu
+    };
+
+    localStorage.setItem("savedData", JSON.stringify(savedData));
+
+    // Menampilkan notifikasi sukses
     const notif = document.getElementById("notif");
     notif.style.display = "block";
-    setTimeout(() => (notif.style.display = "none"), 3000);
+    setTimeout(() => {
+        notif.style.display = "none";
+    }, 10000);
 }
 
 function resetJadwalSholat() {
